@@ -69,35 +69,22 @@ class Rational:
 
 
 def evaluate_expression(expr: str) -> Rational:
-    tokens = expr.strip().split()
-    result = None
-    current_op = '+'
-
-    def parse_token(tok):
-        return Rational(tok) if '/' in tok else Rational(int(tok))
-
-    for tok in tokens:
-        if tok in '+-*/':
-            current_op = tok
+    import re
+    def repl(match):
+        tok = match.group()
+        if '/' in tok:
+            return f"Rational('{tok}')"
         else:
-            val = parse_token(tok)
-            if result is None:
-                result = val
-            else:
-                if current_op == '+':
-                    result = result + val
-                elif current_op == '-':
-                    result = result - val
-                elif current_op == '*':
-                    result = result * val
-                elif current_op == '/':
-                    result = result / val
-    return result
+            return f"Rational({tok})"
+    expr = re.sub(r'\d+/\d+|\d+', repl, expr)
+    return eval(expr, {"Rational": Rational})
 
 
 def main():
     with open("input01.txt", "r") as fin, open("output_demo.txt", "w") as fout:
         for line in fin:
+            if not line.strip():
+                continue
             try:
                 res = evaluate_expression(line)
                 fout.write(f"{line.strip()} = {res} = {res():.5f}\n")
